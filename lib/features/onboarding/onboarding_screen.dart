@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/providers.dart';
 import '../home/home_shell.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
 class _OnboardingPage {
@@ -17,7 +19,7 @@ class _OnboardingPage {
   const _OnboardingPage(this.icon, this.title, this.subtitle);
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _controller = PageController();
   int _index = 0;
 
@@ -41,6 +43,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const HomeShell()),
     );
+  }
+
+  Future<void> _finishWithSampleData() async {
+    await ref.read(databaseProvider).loadSampleVocabulary();
+    await _finish();
   }
 
   @override
@@ -117,16 +124,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: isLast
-                      ? _finish
-                      : () => _controller.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeOut),
-                  child: Text(isLast ? 'শুরু করি' : 'পরবর্তী'),
-                ),
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isLast
+                          ? _finish
+                          : () => _controller.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeOut),
+                      child: Text(isLast ? 'শুরু করি (নিজের শব্দ দিয়ে)' : 'পরবর্তী'),
+                    ),
+                  ),
+                  if (isLast) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    TextButton(
+                      onPressed: _finishWithSampleData,
+                      child: const Text('নমুনা শব্দ দিয়ে দেখতে চাই'),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
