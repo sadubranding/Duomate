@@ -1,0 +1,41 @@
+name: Build DuoMate APK
+
+# এই ফাইলটাই সেই "অটো-বিল্ড রোবট"।
+# GitHub-এ কোড push/upload করলেই এটা নিজে থেকে চালু হয়ে
+# একটা APK বানিয়ে ফেলবে, যেটা "Actions" ট্যাব থেকে ডাউনলোড করা যাবে।
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # "Run workflow" বাটন দিয়ে হাতে চালানোর অপশনও থাকবে
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: কোড checkout করা
+        uses: actions/checkout@v4
+
+      - name: Flutter ইনস্টল করা
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Android platform ফোল্ডার তৈরি করা
+        run: flutter create --platforms=android --org com.duomate --project-name duomate .
+
+      - name: প্যাকেজগুলো ডাউনলোড করা
+        run: flutter pub get
+
+      - name: ডাটাবেজ কোড জেনারেট করা (Drift)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: APK বিল্ড করা (release version)
+        run: flutter build apk --release
+
+      - name: APK আপলোড করা (ডাউনলোডযোগ্য করে)
+        uses: actions/upload-artifact@v4
+        with:
+          name: duomate-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
