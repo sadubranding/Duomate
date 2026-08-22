@@ -11,6 +11,9 @@ on:
     types: [ published ] # Release বানালেই APK সেই Release-এ যুক্ত হয়ে যাবে
   workflow_dispatch: # "Run workflow" বাটন দিয়ে হাতে চালানোর অপশনও থাকবে
 
+permissions:
+  contents: write # Release-এ APK যুক্ত করার জন্য প্রয়োজনীয় অনুমতি
+
 jobs:
   build:
     runs-on: ubuntu-latest
