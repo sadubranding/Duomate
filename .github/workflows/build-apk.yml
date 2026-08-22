@@ -7,6 +7,8 @@ name: Build DuoMate APK
 on:
   push:
     branches: [ main ]
+  release:
+    types: [ published ] # Release বানালেই APK সেই Release-এ যুক্ত হয়ে যাবে
   workflow_dispatch: # "Run workflow" বাটন দিয়ে হাতে চালানোর অপশনও থাকবে
 
 jobs:
@@ -24,6 +26,15 @@ jobs:
       - name: Android platform ফোল্ডার তৈরি করা
         run: flutter create --platforms=android --org com.duomate --project-name duomate .
 
+      - name: Android build সেটিংস আপডেট করা (compileSdk + desugaring)
+        run: |
+          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
+          sed -i '/isCoreLibraryDesugaringEnabled/d' android/app/build.gradle.kts
+          sed -i '/compileOptions {/a\        isCoreLibraryDesugaringEnabled = true' android/app/build.gradle.kts
+          if ! grep -q "desugar_jdk_libs" android/app/build.gradle.kts; then
+            sed -i '/^dependencies {/a\    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")' android/app/build.gradle.kts
+          fi
+
       - name: প্যাকেজগুলো ডাউনলোড করা
         run: flutter pub get
 
@@ -33,8 +44,14 @@ jobs:
       - name: APK বিল্ড করা (release version)
         run: flutter build apk --release
 
-      - name: APK আপলোড করা (ডাউনলোডযোগ্য করে)
+      - name: APK আপলোড করা (Actions ট্যাব থেকে ডাউনলোডযোগ্য)
         uses: actions/upload-artifact@v4
         with:
           name: duomate-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: APK কে Release-এর সাথে যুক্ত করা
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
