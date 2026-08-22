@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'tables.dart';
+import '../core/constants/sample_data.dart';
 
 part 'database.g.dart';
 
@@ -83,6 +84,18 @@ class AppDatabase extends _$AppDatabase {
           ..where((t) =>
               t.word.lower().like(q) | t.meaning.lower().like(q)))
         .get();
+  }
+
+  /// Loads the built-in sample vocabulary — used by the "Try Sample
+  /// Vocabulary" onboarding option for first-time users.
+  Future<void> loadSampleVocabulary() async {
+    for (final s in sampleVocabulary) {
+      await addVocabulary(
+        word: s.word,
+        meaning: s.meaning,
+        exampleSentence: s.example,
+      );
+    }
   }
 
   // ---------- Review sessions & attempts ----------
