@@ -31,9 +31,12 @@ jobs:
           sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
           sed -i '/isCoreLibraryDesugaringEnabled/d' android/app/build.gradle.kts
           sed -i '/compileOptions {/a\        isCoreLibraryDesugaringEnabled = true' android/app/build.gradle.kts
-          if ! grep -q "desugar_jdk_libs" android/app/build.gradle.kts; then
-            sed -i '/^dependencies {/a\    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")' android/app/build.gradle.kts
-          fi
+          cat >> android/app/build.gradle.kts << 'EOF'
+
+          dependencies {
+              coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+          }
+          EOF
 
       - name: প্যাকেজগুলো ডাউনলোড করা
         run: flutter pub get
