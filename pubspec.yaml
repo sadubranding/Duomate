@@ -30,10 +30,6 @@ dependencies:
   uuid: ^4.4.0
   shared_preferences: ^2.2.3
 
-  # Notifications
-  flutter_local_notifications: ^17.1.2
-  timezone: ^0.9.3
-
   # Export / Import
   file_picker: ^8.0.3
   share_plus: ^9.0.0
@@ -47,6 +43,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
-    - assets/sample_data/
