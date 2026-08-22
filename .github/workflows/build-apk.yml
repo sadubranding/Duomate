@@ -19,7 +19,6 @@ jobs:
       - name: Flutter ইনস্টল করা
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Android platform ফোল্ডার তৈরি করা
