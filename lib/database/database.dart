@@ -252,6 +252,15 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
+  
+  /// Today's activity only — powers the "7 / 10 reviews completed" bar on Home.
+  Stream<DailyActivityData?> watchToday() {
+    final today = DateTime.now();
+    final dayKey = DateTime(today.year, today.month, today.day);
+    return (select(dailyActivity)..where((t) => t.date.equals(dayKey)))
+        .watchSingleOrNull();
+  }
+
   // ---------- Settings (single row) ----------
 
   Stream<UserSetting> watchSettings() {
