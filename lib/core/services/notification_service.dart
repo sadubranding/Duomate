@@ -8,8 +8,7 @@ class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
   Future<void> init() async {
@@ -24,8 +23,7 @@ class NotificationService {
 
   /// Android 13+ requires this explicit runtime request.
   Future<void> requestPermission() async {
-    final androidImpl = _plugin.resolvePlatformSpecificImplementation
-        AndroidFlutterLocalNotificationsPlugin>();
+    final AndroidFlutterLocalNotificationsPlugin? androidImpl = _plugin.resolvePlatformSpecificImplementation();
     if (androidImpl != null) {
       await androidImpl.requestNotificationsPermission();
     }
@@ -36,8 +34,7 @@ class NotificationService {
   Future<void> scheduleDailyReminder({int hour = 20}) async {
     await init();
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour);
+    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
@@ -57,6 +54,7 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
