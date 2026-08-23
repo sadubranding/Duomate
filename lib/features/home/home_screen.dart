@@ -54,6 +54,50 @@ class HomeScreen extends ConsumerWidget {
               error: (e, _) => const SizedBox.shrink(),
             ),
             const SizedBox(height: AppSpacing.md),
+            settings.when(
+              data: (s) => StreamBuilder(
+                stream: ref.read(databaseProvider).watchToday(),
+                builder: (context, snapshot) {
+                  final done = snapshot.data?.reviewsCompleted ?? 0;
+                  final goal = s.dailyGoal;
+                  final progress = goal == 0 ? 0.0 : (done / goal).clamp(0, 1);
+                  final reached = done >= goal;
+                  return IosCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('🎯 আজকের লক্ষ্য',
+                                style: Theme.of(context).textTheme.titleMedium),
+                            Text('$done / $goal',
+                                style: Theme.of(context).textTheme.titleMedium),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          child: LinearProgressIndicator(
+                            value: progress.toDouble(),
+                            minHeight: 8,
+                            backgroundColor: AppColors.separatorLight,
+                            color: reached ? AppColors.success : AppColors.primary,
+                          ),
+                        ),
+                        if (reached) ...[
+                          const SizedBox(height: AppSpacing.sm),
+                          const Text('🎉 আজকের লক্ষ্য পূরণ হয়েছে!'),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+              loading: () => const SizedBox.shrink(),
+              error: (e, _) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(
