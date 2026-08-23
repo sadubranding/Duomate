@@ -4,13 +4,13 @@ import 'package:drift/drift.dart' show Value;
 import '../../core/theme/app_theme.dart';
 import '../../core/providers.dart';
 import '../../core/services/notification_service.dart';
+import '../../core/services/backup_service.dart';
 import '../../database/database.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _onNotificationToggle(
-      AppDatabase db, bool enabled) async {
+  Future<void> _onNotificationToggle(AppDatabase db, bool enabled) async {
     if (enabled) {
       await NotificationService.instance.requestPermission();
       await NotificationService.instance.scheduleDailyReminder();
@@ -19,6 +19,32 @@ class SettingsScreen extends ConsumerWidget {
     }
     await db.upsertSettings(
         UserSettingsCompanion(notificationsEnabled: Value(enabled)));
+  }
+
+  Future<void> _export(BuildContext context, AppDatabase db) async {
+    try {
+      await BackupService(db).exportAndShare();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('এক্সপোর্ট ব্যর্থ হয়েছে: $e')));
+      }
+    }
+  }
+
+  Future<void> _import(BuildContext context, AppDatabase db) async {
+    try {
+      final count = await BackupService(db).importFromFile();
+      if (!context.mounted) return;
+      if (count == null) return; // user cancelled
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$count টি শব্দ ইম্পোর্ট হয়েছে')));
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('ইম্পোর্ট ব্যর্থ হয়েছে: $e')));
+      }
+    }
   }
 
   @override
@@ -91,6 +117,30 @@ class SettingsScreen extends ConsumerWidget {
                     const Text('প্রতিদিন সন্ধ্যা ৮টায় মনে করিয়ে দেবে (বাকি থাকলে)'),
                 value: s.notificationsEnabled,
                 onChanged: (v) => _onNotificationToggle(db, v),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('ডেটা ব্যাকআপ', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
+            IosCard(
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.upload_file_rounded),
+                    title: const Text('এক্সপোর্ট করুন'),
+                    subtitle: const Text('সব শব্দ JSON ফাইলে সংরক্ষণ করুন'),
+                    onTap: () => _export(context, db),
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.download_rounded),
+                    title: const Text('ইম্পোর্ট করুন'),
+                    subtitle: const Text('আগের ব্যাকআপ ফাইল থেকে ফিরিয়ে আনুন'),
+                    onTap: () => _import(context, db),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
