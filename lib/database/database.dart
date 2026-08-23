@@ -23,6 +23,9 @@ const _uuid = Uuid();
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  /// Used by tests to run against an in-memory database instead of a file.
+  AppDatabase.forTesting(QueryExecutor executor) : super(executor);
+
   @override
   int get schemaVersion => 1;
 
