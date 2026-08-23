@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/providers.dart';
+import 'core/services/notification_service.dart';
 import 'features/onboarding/onboarding_screen.dart';
 import 'features/home/home_shell.dart';
 
@@ -17,6 +18,14 @@ class DuoMateApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsStreamProvider);
+
+    settings.whenData((s) {
+      // ফোন রিস্টার্ট হলে সিস্টেম শিডিউল হারিয়ে ফেলতে পারে, তাই অ্যাপ খোলার
+      // সময় (enabled থাকলে) আবার শিডিউল করে নিচ্ছি।
+      if (s.notificationsEnabled) {
+        NotificationService.instance.scheduleDailyReminder();
+      }
+    });
 
     final themeMode = settings.maybeWhen(
       data: (s) => switch (s.theme) {
