@@ -8,7 +8,8 @@ class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
-  final _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
   Future<void> init() async {
@@ -23,10 +24,11 @@ class NotificationService {
 
   /// Android 13+ requires this explicit runtime request.
   Future<void> requestPermission() async {
-    await _plugin
-        .resolvePlatformSpecificImplementation
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    final androidImpl = _plugin.resolvePlatformSpecificImplementation
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (androidImpl != null) {
+      await androidImpl.requestNotificationsPermission();
+    }
   }
 
   /// Schedules (or re-schedules) a single daily reminder at [hour]:00 local
@@ -55,7 +57,7 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, // repeats daily
+      matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
