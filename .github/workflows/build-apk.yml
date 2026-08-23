@@ -41,6 +41,10 @@ jobs:
           }
           EOF
 
+      - name: নোটিফিকেশন পারমিশন যোগ করা
+        run: |
+          sed -i '/<manifest /a\    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>' android/app/src/main/AndroidManifest.xml
+
       - name: প্যাকেজগুলো ডাউনলোড করা
         run: flutter pub get
 
