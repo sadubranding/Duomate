@@ -3,10 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
 import '../../core/theme/app_theme.dart';
 import '../../core/providers.dart';
+import '../../core/services/notification_service.dart';
 import '../../database/database.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  Future<void> _onNotificationToggle(
+      AppDatabase db, bool enabled) async {
+    if (enabled) {
+      await NotificationService.instance.requestPermission();
+      await NotificationService.instance.scheduleDailyReminder();
+    } else {
+      await NotificationService.instance.cancelAll();
+    }
+    await db.upsertSettings(
+        UserSettingsCompanion(notificationsEnabled: Value(enabled)));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -74,10 +87,10 @@ class SettingsScreen extends ConsumerWidget {
             IosCard(
               child: SwitchListTile(
                 title: const Text('রিভিউ রিমাইন্ডার'),
-                subtitle: const Text('বাকি থাকা রিভিউ সম্পর্কে মনে করিয়ে দেবে'),
+                subtitle:
+                    const Text('প্রতিদিন সন্ধ্যা ৮টায় মনে করিয়ে দেবে (বাকি থাকলে)'),
                 value: s.notificationsEnabled,
-                onChanged: (v) => db.upsertSettings(
-                    UserSettingsCompanion(notificationsEnabled: Value(v))),
+                onChanged: (v) => _onNotificationToggle(db, v),
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
