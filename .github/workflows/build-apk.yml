@@ -70,6 +70,9 @@ jobs:
       - name: ডাটাবেজ কোড জেনারেট করা (Drift)
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: টেস্ট চালানো
+        run: flutter test
+
       - name: APK বিল্ড করা (release version)
         run: flutter build apk --release
 
