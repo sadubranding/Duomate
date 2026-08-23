@@ -29,6 +29,10 @@ jobs:
       - name: Android platform ফোল্ডার তৈরি করা
         run: flutter create --platforms=android --org com.duomate --project-name duomate .
 
+        
+      - name: ডিফল্ট টেমপ্লেট টেস্ট ফাইল মুছে ফেলা
+        run: rm -f test/widget_test.dart
+
       - name: Android build সেটিংস আপডেট করা (compileSdk + desugaring)
         # নতুন প্লাগিনগুলো (নোটিফিকেশন, ফাইল পিকার ইত্যাদি) নতুন Android SDK
         # আর "core library desugaring" চায় — এই ধাপ সেটা আগে থেকেই ঠিক করে রাখে,
