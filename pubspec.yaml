@@ -31,8 +31,8 @@ dependencies:
   shared_preferences: ^2.2.3
 
   # Notifications
-  flutter_local_notifications: ^18.0.1
-  timezone: ^0.9.4
+  flutter_local_notifications: 18.0.1
+  timezone: 0.9.4
 
 dev_dependencies:
   flutter_test:
